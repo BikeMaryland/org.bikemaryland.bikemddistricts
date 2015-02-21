@@ -1,24 +1,31 @@
-{literal}
+
+{* keep api key in separate file *}
+{config_load file='apikey.conf'}
+{config_load file='fields.conf'}
 
 <script>
-
-//var DEL_OM="#custom_32"
-//var SEN_OM="#custom_31"
-
-var DEL_OM="#custom_1"
-var SEN_OM="#custom_2"
-var STREET_FLD="street_address-1"
-var ADD2_FLD="supplemental_address_1-Primary"
-var CITY_FLD="city-1"
-var STATE_OM="#state_province-1"
-var ZIP_OM="postal_code-1"
-
+// delegate option menu    
+var DEL_OM="#{$smarty.config.del_om}"
+// senate option menu
+var SEN_OM="#{$smarty.config.sen_om}"
+// street field
+var STREET_FLD="#{$smarty.config.street_fld}"
+// additional address field
+var ADD2_FLD="#{$smarty.config.add2_fld}"
+// city field
+var CITY_FLD="#{$smarty.config.city_fld}"
+// state option menu
+var STATE_OM="#{$smarty.config.state_om}"
+// postal/zip code option menu
+var ZIP_OM="#{$smarty.config.zip_om}"
 // entire Legislative District field set
-var LD_FS=".crm-profile-id-14"
+var LD_FS=".{$smarty.config.ld_fs}"
+// google civic api key
+var KEY="{$smarty.config.apikey}"
+
+{literal}
 
 function buildAddressParam($, address){
-    //var address=getAddress($);
-
     // build address string to send to Google
     return address.street1 + " " + address.street2 + " " + 
       address.city + " " + address.state + " " + address.zip
@@ -26,17 +33,12 @@ function buildAddressParam($, address){
 
 function getAddress($){
    // Gather and returns parts of address from form
-
-   console.log("getAddress called");
-
-   //var sad2=$("input[name='"+ADD2_FLD+"']").val()
-
    return {
-    "street1":$("input[name='"+STREET_FLD+"']").val(),
+    "street1":$(STREET_FLD).val(),
     "street2":"",
-    "city":$("input[name='"+CITY_FLD+"']").val(),
+    "city":$(CITY_FLD).val(),
     "state":$(STATE_OM+" option:selected").text(),
-    "zip":$("input[name='"+ZIP_OM+"']").val()
+    "zip":$(ZIP_OM).val()
     }
 }
 
@@ -50,7 +52,7 @@ function toggleDistricts($, val){
 
 	resetDistricts($);
 
-        $("a[href='http://mdelect.net']").hide()
+        //$("a[href='http://mdelect.net']").hide()
     } else {
         // Show entire Legislative District field set
         $(LD_FS).show();
@@ -95,6 +97,8 @@ function resetDistricts($){
 function doSearch($){
    console.log("dosearch called");
    var address=getAddress($);
+   
+      console.log(JSON.stringify(address));
 
    if(!isEmpty(address.street1) && 
       !isEmpty(address.state) &&
@@ -108,23 +112,23 @@ function doSearch($){
             type: "GET",
             url: "https://www.googleapis.com/civicinfo/v2/representatives/?address=" +
 		encodeURIComponent(address) +
-		"&fields=divisions&key=",
+		"&fields=divisions&key="+KEY,
             dataType: "json",
             contentType: "application/json; charset=utf-8",
 
 	    beforeSend:function(){
-	       $("a[href='http://mdelect.net']").text("calculating...");
+	       //$("a[href='http://mdelect.net']").text("checking you");
 	       // Clear values
 	       resetDistricts($);
 
             },
             complete:function(){
-	       $("a[href='http://mdelect.net']").text("lookup");
+               //$("a[href='http://mdelect.net']").text("lookup");
             }
         }).done(function(data) {
 	    var districts = parseGoogleCivicOutput(data);
 	    console.log(JSON.stringify(districts));
-
+ 
             $(SEN_OM).select2("val", districts.sen);
             $(DEL_OM).select2("val", districts.del);
 	});
@@ -142,15 +146,15 @@ cj(document).ready(function($) {
     toggleDistricts($, $(STATE_OM).find("option:selected").text());
 
     // When focus leaves these fields, try to do a lookup
-    $("input[name='"+STREET_FLD+"']").blur(function(){
+    $(STREET_FLD).blur(function(){
 	doSearch($);
     });
 
-    $("input[name='"+CITY_FLD+"']").blur(function(){
+    $(CITY_FLD).blur(function(){
 	doSearch($);
     });
 
-    $("input[name='"+ZIP_OM+"']").blur(function(){
+    $(ZIP_OM).blur(function(){
 	doSearch($);
     });
 
@@ -161,13 +165,15 @@ cj(document).ready(function($) {
 	doSearch($);
     });
 
-    $("a[href='http://mdelect.net']").text("lookup");
+    //$(LD_FS).find("div.messages").hide();
+    
+    //$("a[href='http://mdelect.net']").text("lookup");
 
-    $("a[href='http://mdelect.net']").click(function( event ) {
-        doSearch($);
+    //$("a[href='http://mdelect.net']").click(function( event ) {
+    //    doSearch($);
 
-	event.preventDefault();
-    });
+    //	event.preventDefault();
+    //});
 });
 
 </script>

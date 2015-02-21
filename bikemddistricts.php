@@ -4,23 +4,37 @@ require_once 'bikemddistricts.civix.php';
 
 /**
  * Implementation of hook_civicrm_buildForm
+ * 
+ * Figure out which version CiviCRM we are running and call correct handler
  */
 function bikemddistricts_civicrm_buildForm($formName, &$form) {
-  //if ($formName == 'CRM_Event_Form_Registration_Register') {
+    $version = CRM_Utils_System::version();
+    //var_dump($version);
+    
+    if(startsWith($version, "4.5")){
+        bikemddistricts_version45($formName, $form);
+    } else if(startsWith($version, "4.4")){
+        bikemddistricts_version44($formName, $form);
+    }
+}
 
-//var_dump($form->_fields);
+function bikemddistricts_version44($formName, &$form) {
 
-  // Does this form contain our custom field?  If so
-  // add our template
-  $gotSEN = $form->elementExists('custom_1');
+}
 
-  if ( $gotSEN ) {
-    // Assumes templates are in a templates folder relative to this file
-    $templatePath = realpath(dirname(__FILE__)."/templates");
-    CRM_Core_Region::instance('page-body')->add(array(
-      'template' => "{$templatePath}/districts.tpl"
-      ));
-   }
+
+function bikemddistricts_version45($formName, &$form) {
+    // Does this form contain one of the district custom fields?  If so
+    // add our template
+    $gotSEN = $form->elementExists('custom_1');
+
+    if ($gotSEN) {
+        // Assumes templates are in a templates folder relative to this file
+        $templatePath = realpath(dirname(__FILE__) . "/templates");
+        CRM_Core_Region::instance('page-body')->add(array(
+            'template' => "{$templatePath}/districts45.tpl"
+        ));
+    }
 }
 
 /**
@@ -126,4 +140,9 @@ function bikemddistricts_civicrm_caseTypes(&$caseTypes) {
  */
 function bikemddistricts_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _bikemddistricts_civix_civicrm_alterSettingsFolders($metaDataFolders);
+}
+
+function startsWith($haystack, $needle) {
+    // search backwards starting from haystack length characters from the end
+    return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== FALSE;
 }
