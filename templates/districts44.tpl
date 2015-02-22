@@ -68,18 +68,26 @@ function parseGoogleCivicOutput(data){
     var delegate="";
 
     for(key in data.divisions){
-	console.log(key);
+	console.log("key = "  + key);
 	// search for senate district
 	if(key.slice(0,SENATE_OCD.length) == SENATE_OCD) {
             senate=key
-            if(data.divisions[key].hasOwnProperty("alsoKnownAs")){
-		    <!-- also delegate district -->
-		    delegate=data.divisions[key].alsoKnownAs[0]
+	    console.log("assigning senat from: "+ senate);
+	    // sometimes delegate district is tagged 'alsoKnownAs' when the 
+	    // senate and delegate district are identical, i.e. both are '13'
+	    if(data.divisions[key].hasOwnProperty("alsoKnownAs") &&
+               isEmpty(delegate)){
+		aka=data.divisions[key].alsoKnownAs[0];
+		if(aka.slice(0,DELEGATE_OCD.length) == DELEGATE_OCD) {
+		   delegate=aka;
+		   console.log("assigning delegate from aka: "+ delegate);
+                }
             }
 	}
 	// search for delegate district 
 	if(key.slice(0,DELEGATE_OCD.length) == DELEGATE_OCD) {
             delegate=key;
+	    console.log("assigning delegate from key: "+ delegate);
 	}
     }
     // extract district numbers
@@ -126,6 +134,7 @@ function doSearch($){
                //$("a[href='http://mdelect.net']").text("lookup");
             }
         }).done(function(data) {
+	    console.log("rslt:" + JSON.stringify(data));
 	    var districts = parseGoogleCivicOutput(data);
 	    console.log(JSON.stringify(districts));
  
