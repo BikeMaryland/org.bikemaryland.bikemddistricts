@@ -19,7 +19,17 @@ function bikemddistricts_civicrm_buildForm($formName, &$form) {
 }
 
 function bikemddistricts_version44($formName, &$form) {
+    // Does this form contain one of the district custom fields?  If so
+    // add our template
+    $gotSEN = $form->elementExists('custom_32');
 
+    if ($gotSEN) {
+        // Assumes templates are in a templates folder relative to this file
+        $templatePath = realpath(dirname(__FILE__) . "/templates");
+        CRM_Core_Region::instance('page-body')->add(array(
+            'template' => "{$templatePath}/districts44.tpl"
+        ));
+    }
 }
 
 

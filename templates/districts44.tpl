@@ -1,10 +1,10 @@
 
 {* keep api key in separate file *}
 {config_load file='apikey.conf'}
-{config_load file='fields45.conf'}
+{config_load file='fields44.conf'}
 
 <script>
-// delegate option menu    
+// delegate option menu
 var DEL_OM="#{$smarty.config.del_om}"
 // senate option menu
 var SEN_OM="#{$smarty.config.sen_om}"
@@ -35,7 +35,7 @@ function getAddress($){
    // Gather and returns parts of address from form
    return {
     "street1":$(STREET_FLD).val(),
-    "street2":"",
+    "street2":$(ADD2_FLD).val(),
     "city":$(CITY_FLD).val(),
     "state":$(STATE_OM+" option:selected").text(),
     "zip":$(ZIP_OM).val()
@@ -90,8 +90,8 @@ function parseGoogleCivicOutput(data){
 }
 
 function resetDistricts($){
-    $(DEL_OM).select2("val", "");
-    $(SEN_OM).select2("val", "");
+    $(DEL_OM).val("");
+    $(SEN_OM).val("");
 }
 
 function doSearch($){
@@ -100,7 +100,7 @@ function doSearch($){
    
       console.log(JSON.stringify(address));
 
-   if(!isEmpty(address.street1) && 
+   if((!isEmpty(address.street1) || !isEmpty(address.street2)) && 
       !isEmpty(address.state) &&
       (address.state == "Maryland")){
 
@@ -129,8 +129,8 @@ function doSearch($){
 	    var districts = parseGoogleCivicOutput(data);
 	    console.log(JSON.stringify(districts));
  
-            $(SEN_OM).select2("val", districts.sen);
-            $(DEL_OM).select2("val", districts.del);
+            $(SEN_OM).val(districts.sen);
+            $(DEL_OM).val(districts.del);
 	});
    }
 }
@@ -147,6 +147,10 @@ cj(document).ready(function($) {
 
     // When focus leaves these fields, try to do a lookup
     $(STREET_FLD).blur(function(){
+	doSearch($);
+    });
+
+    $(ADD2_FLD).blur(function(){
 	doSearch($);
     });
 
