@@ -44,9 +44,18 @@ function getAddress($){
 
 function toggleDistricts($, val){
 
-    console.log("toggle districts with: " + JSON.stringify(val, null, 4));
+    var statehidden=$(STATE_OM).attr("type");
+    var parent=$(STATE_OM).parent();
+     
+    var theval = (statehidden != 'hidden') ? 
+    	$(STATE_OM).find("option:selected").text() : 
+	parent.text();
 
-    if(val != 'Maryland'){
+    console.log("toggle districts with: " + JSON.stringify(theval));
+    console.log("toggle districts with: " + JSON.stringify(statehidden));
+    console.log("toggle districts with: " + parent.text());
+
+    if((theval != 'Maryland')){
         // Hide entire Legislative District field set
         $(LD_FS).hide();
 
@@ -57,6 +66,8 @@ function toggleDistricts($, val){
         // Show entire Legislative District field set
         $(LD_FS).show();
     }
+
+    $(LD_FS).prop("disabled", (statehidden == 'hidden'));
 }
 
 function parseGoogleCivicOutput(data){
